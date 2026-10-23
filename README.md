@@ -148,13 +148,6 @@ CORPALIV busca contribuir a una sociedad más inclusiva, visibilizando oportunid
 
 ## 👥 Integrantes
 
-- **Diego:** [agregar apellido y perfil de GitHub]
-- **[Nombre del segundo integrante]:** [agregar apellido y perfil de GitHub]
+- **Diego Berríos**
+- **Valentina Osses**
 
-## 📚 Contexto académico
-
-Proyecto desarrollado en el contexto de la asignatura de **Desarrollo de Aplicaciones Móviles**, utilizando tecnologías nativas de Android y buenas prácticas de organización del código.
-
-## 📄 Licencia
-
-Este proyecto no declara actualmente una licencia de distribución. El código y los recursos no deben considerarse de libre reutilización hasta que se defina una licencia y se verifiquen los derechos de uso de los recursos incluidos.
