@@ -14,30 +14,34 @@ import com.example.corpaliv.data.local.SolicitudDatabase
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class ColaborarViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+class ColaborarViewModel(application: Application) : AndroidViewModel(application) {
 
     private val solicitudDao =
         SolicitudDatabase.obtenerBaseDatos(application).solicitudDao()
 
     var nombre by mutableStateOf("")
+    var apellidos by mutableStateOf("")
     var rut by mutableStateOf("")
         private set
     var correo by mutableStateOf("")
     var aporte by mutableStateOf("")
     var fecha by mutableStateOf("")
+    var causaSeleccionada by mutableStateOf("")
+    var aporteMensual by mutableStateOf(false)
+    var metodoPago by mutableStateOf("")
 
     var aceptaCondiciones by mutableStateOf(false)
     var recibirNovedades by mutableStateOf(false)
     var anonima by mutableStateOf(false)
 
     var errorNombre by mutableStateOf(false)
+    var errorApellidos by mutableStateOf(false)
     var errorRut by mutableStateOf(false)
     var errorCorreo by mutableStateOf(false)
     var errorAporte by mutableStateOf(false)
     var errorFecha by mutableStateOf(false)
     var errorCondiciones by mutableStateOf(false)
+    var errorMetodoPago by mutableStateOf(false)
 
     var mensaje by mutableStateOf("")
     var guardando by mutableStateOf(false)
@@ -49,34 +53,39 @@ class ColaborarViewModel(
         cargarSolicitudes()
     }
 
+    fun seleccionarCausa(causa: String) {
+        causaSeleccionada = causa
+        mensaje = ""
+    }
+
+    fun volverACausas() {
+        causaSeleccionada = ""
+        mensaje = ""
+    }
+
     fun actualizarRut(valor: String) {
-        val limpio = valor
-            .uppercase(Locale.ROOT)
+        val limpio = valor.uppercase(Locale.ROOT)
             .filter { it.isDigit() || it == 'K' }
             .take(9)
 
-        rut = formatearRutMientrasEscribe(limpio)
+        rut = if (limpio.length <= 1) {
+            limpio
+        } else {
+            val cuerpo = limpio.dropLast(1)
+            val digito = limpio.last()
+            val cuerpoConPuntos = cuerpo.reversed()
+                .chunked(3)
+                .joinToString(".")
+                .reversed()
+            "$cuerpoConPuntos-$digito"
+        }
+
         errorRut = false
         mensaje = ""
     }
 
-    private fun formatearRutMientrasEscribe(valor: String): String {
-        if (valor.length <= 1) return valor
-
-        val cuerpo = valor.dropLast(1)
-        val digito = valor.last()
-
-        val cuerpoConPuntos = cuerpo.reversed()
-            .chunked(3)
-            .joinToString(".")
-            .reversed()
-
-        return "$cuerpoConPuntos-$digito"
-    }
-
     private fun rutEsValido(valor: String): Boolean {
-        val limpio = valor
-            .uppercase(Locale.ROOT)
+        val limpio = valor.uppercase(Locale.ROOT)
             .replace(".", "")
             .replace("-", "")
             .replace(" ", "")
@@ -88,7 +97,6 @@ class ColaborarViewModel(
 
         if (!cuerpo.all { it.isDigit() }) return false
         if (cuerpo.first() == '0') return false
-
         if (digitoIngresado !in '0'..'9' && digitoIngresado != 'K') {
             return false
         }
@@ -102,7 +110,6 @@ class ColaborarViewModel(
         }
 
         val resto = 11 - (suma % 11)
-
         val digitoCalculado = when (resto) {
             11 -> '0'
             10 -> 'K'
@@ -124,24 +131,25 @@ class ColaborarViewModel(
 
     fun validarSolicitud(): Boolean {
         errorNombre = nombre.isBlank()
+        errorApellidos = apellidos.isBlank()
         errorRut = !rutEsValido(rut)
-
-        errorCorreo = !Patterns.EMAIL_ADDRESS
-            .matcher(correo.trim())
-            .matches()
+        errorCorreo = !Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches()
 
         val cantidad = aporte.toIntOrNull()
         errorAporte = cantidad == null || cantidad <= 0
-
         errorFecha = fecha.isBlank()
         errorCondiciones = !aceptaCondiciones
+        errorMetodoPago = metodoPago.isBlank()
 
-        return !errorNombre &&
+        return causaSeleccionada.isNotBlank() &&
+                !errorNombre &&
+                !errorApellidos &&
                 !errorRut &&
                 !errorCorreo &&
                 !errorAporte &&
                 !errorFecha &&
-                !errorCondiciones
+                !errorCondiciones &&
+                !errorMetodoPago
     }
 
     fun validarYGuardarSolicitud() {
@@ -159,26 +167,27 @@ class ColaborarViewModel(
             try {
                 val solicitud = Solicitud(
                     nombre = nombre.trim(),
+                    apellidos = apellidos.trim(),
                     rut = rut.replace(".", "").trim(),
                     correo = correo.trim(),
                     aporte = aporte.toInt(),
                     fecha = fecha,
                     recibirNovedades = recibirNovedades,
-                    anonima = anonima
+                    anonima = anonima,
+                    causa = causaSeleccionada,
+                    aporteMensual = aporteMensual,
+                    metodoPago = metodoPago
                 )
 
                 solicitudDao.insertar(solicitud)
                 solicitudes = solicitudDao.obtenerTodas()
-
                 mensaje = "¡Solicitud guardada correctamente!"
 
-                // La notificación se intenta enviar después del guardado.
-                // Si falta el permiso, la solicitud permanece guardada.
                 NotificacionesLocales.enviar(
                     context = getApplication(),
                     titulo = "¡Gracias por colaborar! 💚",
-                    mensaje = "Tu solicitud de aporte quedó guardada " +
-                            "en este dispositivo. CORPALIV agradece tu interés."
+                    mensaje = "Tu solicitud quedó guardada en este dispositivo. " +
+                            "No se ha procesado ningún pago."
                 )
             } catch (e: Exception) {
                 mensaje = "No se pudo guardar la solicitud."

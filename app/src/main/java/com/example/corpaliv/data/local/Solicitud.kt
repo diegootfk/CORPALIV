@@ -14,5 +14,9 @@ data class Solicitud(
     val fecha: String,
     val recibirNovedades: Boolean,
     val anonima: Boolean = false,
-    val rut: String = ""
+    val rut: String = "",
+    val causa: String = "Donación general",
+    val apellidos: String = "",
+    val aporteMensual: Boolean = false,
+    val metodoPago: String = "Sin seleccionar"
 )

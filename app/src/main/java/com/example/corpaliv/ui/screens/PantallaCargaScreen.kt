@@ -1,17 +1,10 @@
-
 package com.example.corpaliv.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,12 +28,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.corpaliv.R
 
 private val VerdeCarga = Color(0xFF176B50)
 private val FondoCarga = Color(0xFFF5F7F4)
@@ -51,128 +46,109 @@ private val VerdeClaroCarga = Color(0xFFE4F1E9)
 fun PantallaCargaScreen(
     onComenzar: () -> Unit
 ) {
-    var mostrarMensaje by remember {
-        mutableStateOf(false)
-    }
-
-    val transicion = rememberInfiniteTransition(
-        label = "animacionCorazon"
-    )
-
-    val escala by transicion.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.12f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 1000,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "escalaCorazon"
-    )
-
-    var mostrarContenido by remember {
-        mutableStateOf(true)
-    }
+    var mostrarMensaje by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(FondoCarga)
-            .padding(24.dp),
+            .padding(horizontal = 24.dp, vertical = 28.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "CORPALIV",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = VerdeCarga
+            Image(
+                painter = painterResource(id = R.drawable.logo_corpaliv),
+                contentDescription = "Logo oficial de CORPALIV",
+                modifier = Modifier
+                    .fillMaxWidth(0.82f)
+                    .height(125.dp),
+                contentScale = ContentScale.Fit
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(18.dp))
 
             Text(
                 text = "Inclusión que transforma vidas",
-                fontSize = 16.sp,
-                color = Color.DarkGray,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = VerdeCarga,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(38.dp))
+            Spacer(Modifier.height(12.dp))
 
-            // Corazón interactivo y animado
+            Text(
+                text = "Acompañamos el desarrollo de personas con discapacidad múltiple, promoviendo oportunidades de aprendizaje, autonomía e inclusión.",
+                fontSize = 14.sp,
+                color = Color(0xFF59645E),
+                textAlign = TextAlign.Center,
+                lineHeight = 21.sp
+            )
+
+            Spacer(Modifier.height(26.dp))
+
             Box(
                 modifier = Modifier
-                    .size(150.dp)
-                    .background(
-                        color = VerdeClaroCarga,
-                        shape = CircleShape
-                    )
-                    .clickable {
-                        mostrarMensaje = !mostrarMensaje
-                    },
+                    .size(104.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(VerdeClaroCarga),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (mostrarMensaje) "💚" else "💚",
-                    fontSize = 76.sp,
-                    modifier = Modifier.scale(escala)
+                    text = "💚",
+                    fontSize = 52.sp
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Toca el corazón",
-                fontSize = 14.sp,
-                color = VerdeCarga,
-                fontWeight = FontWeight.SemiBold
+                text = "Cada persona importa",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = VerdeCarga
             )
 
             AnimatedVisibility(
                 visible = mostrarMensaje,
-                enter = fadeIn() + slideInVertically(
-                    initialOffsetY = { it / 3 }
-                )
+                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 3 })
             ) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 14.dp),
+                        .padding(top = 12.dp),
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    )
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Text(
-                        text = "Cada persona tiene capacidades, sueños y talentos. " +
-                                "La inclusión nos ayuda a construir oportunidades para todos. 🌱",
-                        modifier = Modifier.padding(18.dp),
+                        text = "Cada persona tiene capacidades, sueños y talentos. La inclusión nos ayuda a construir oportunidades para todos. 🌱",
+                        modifier = Modifier.padding(16.dp),
                         textAlign = TextAlign.Center,
                         color = VerdeCarga,
-                        fontSize = 15.sp,
-                        lineHeight = 23.sp
+                        fontSize = 14.sp,
+                        lineHeight = 21.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(Modifier.height(24.dp))
 
             Text(
                 text = "Conoce nuestros programas y descubre cómo colaborar.",
                 fontSize = 15.sp,
-                color = Color.DarkGray,
+                color = Color(0xFF59645E),
                 textAlign = TextAlign.Center,
                 lineHeight = 22.sp
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(22.dp))
 
             Button(
                 onClick = onComenzar,
@@ -180,9 +156,7 @@ fun PantallaCargaScreen(
                     .fillMaxWidth()
                     .height(54.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = VerdeCarga
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = VerdeCarga)
             ) {
                 Text(
                     text = "Comenzar  →",
@@ -191,7 +165,7 @@ fun PantallaCargaScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(Modifier.height(16.dp))
 
             Text(
                 text = "Juntos construimos una sociedad más inclusiva",

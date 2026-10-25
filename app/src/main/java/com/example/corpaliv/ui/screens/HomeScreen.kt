@@ -3,6 +3,7 @@ package com.example.corpaliv.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,148 +84,167 @@ fun HomeScreen(
             .fillMaxSize()
             .background(fondo)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = paddingContenido, vertical = espacio),
+            .padding(vertical = espacio),
         verticalArrangement = Arrangement.spacedBy(espacio),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.logo_corpaliv),
-            contentDescription = "Logo oficial de CORPALIV",
-            modifier = Modifier.fillMaxWidth().height(altoLogo),
-            contentScale = ContentScale.Fit
-        )
-
-        Text(
-            text = "Inclusión que transforma vidas",
-            fontSize = if (horizontal) 14.sp else 16.sp,
-            color = textoSecundario,
-            textAlign = TextAlign.Center
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.corpaliv_inclusion_real),
-            contentDescription = "Estudiante de la Escuela Especial Jan Van Dijk participando en una actividad junto a una profesional",
-            modifier = Modifier.fillMaxWidth().height(altoImagen).clip(RoundedCornerShape(22.dp)),
-            contentScale = ContentScale.Crop
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = verde),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = paddingContenido),
+            verticalArrangement = Arrangement.spacedBy(espacio),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo_corpaliv),
+                contentDescription = "Logo oficial de CORPALIV",
+                modifier = Modifier.fillMaxWidth().height(altoLogo),
+                contentScale = ContentScale.Fit
+            )
+
+            Text(
+                text = "Inclusión que transforma vidas",
+                fontSize = if (horizontal) 14.sp else 16.sp,
+                color = textoSecundario,
+                textAlign = TextAlign.Center
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.corpaliv_inclusion_real),
+                contentDescription = "Estudiante de la Escuela Especial Jan Van Dijk participando en una actividad junto a una profesional",
+                modifier = Modifier.fillMaxWidth().height(altoImagen).clip(RoundedCornerShape(22.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = verde),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(if (horizontal) 16.dp else 22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Bienvenido a CORPALIV",
+                        fontSize = if (horizontal) 20.sp else 23.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Somos una corporación comprometida con " +
+                                "la inclusión y el desarrollo de personas con " +
+                                "discapacidad múltiple.",
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        lineHeight = 21.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             Column(
-                modifier = Modifier.fillMaxWidth().padding(if (horizontal) 16.dp else 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "Bienvenido a CORPALIV",
+                    text = "¿Cómo puedes participar?",
                     fontSize = if (horizontal) 20.sp else 23.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
+                    color = verde
                 )
                 Text(
-                    text = "Somos una corporación comprometida con " +
-                            "la inclusión y el desarrollo de personas con " +
-                            "discapacidad múltiple.",
+                    text = "Conoce nuestra labor y descubre cómo contribuir " +
+                            "a una sociedad con más oportunidades.",
                     fontSize = 14.sp,
-                    color = Color.White,
-                    lineHeight = 21.sp,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = "¿Cómo puedes participar?",
-                fontSize = if (horizontal) 20.sp else 23.sp,
-                fontWeight = FontWeight.Bold,
-                color = verde
-            )
-            Text(
-                text = "Conoce nuestra labor y descubre cómo contribuir " +
-                        "a una sociedad con más oportunidades.",
-                fontSize = 14.sp,
-                color = textoSecundario,
-                lineHeight = 21.sp
-            )
-        }
-
-        TarjetaInicio(
-            emoji = "💚",
-            titulo = "Aportes solidarios",
-            descripcion = "Registra tu interés en realizar un aporte y selecciona la fecha que prefieras.",
-            textoBoton = "Quiero colaborar",
-            onClick = onColaborarClick,
-            horizontal = horizontal,
-            colorTarjeta = colorTarjeta,
-            colorTexto = textoPrincipal,
-            colorTextoSecundario = textoSecundario,
-            colorVerde = verde
-        )
-
-        TarjetaInicio(
-            emoji = "📚",
-            titulo = "Nuestros programas",
-            descripcion = "Conoce la Escuela Especial Jan Van Dijk y la Red de Inclusión Sociolaboral Alba Lab.",
-            textoBoton = "Descubrir programas",
-            onClick = onProgramasClick,
-            horizontal = horizontal,
-            colorTarjeta = colorTarjeta,
-            colorTexto = textoPrincipal,
-            colorTextoSecundario = textoSecundario,
-            colorVerde = verde
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = verdeSuave)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(18.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Juntos construimos más oportunidades 🌱",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (esOscuro) Color(0xFFB7F0D8) else verde,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Cada persona tiene capacidades, talentos y sueños que merecen ser reconocidos.",
-                    fontSize = 14.sp,
-                    color = if (esOscuro) Color(0xFFE0F2E9) else verde,
-                    textAlign = TextAlign.Center,
+                    color = textoSecundario,
                     lineHeight = 21.sp
                 )
             }
+
+            TarjetaInicio(
+                emoji = "💚",
+                titulo = "Aportes solidarios",
+                descripcion = "Registra tu interés en realizar un aporte y selecciona la fecha que prefieras.",
+                textoBoton = "Quiero colaborar",
+                onClick = onColaborarClick,
+                horizontal = horizontal,
+                colorTarjeta = colorTarjeta,
+                colorTexto = textoPrincipal,
+                colorTextoSecundario = textoSecundario,
+                colorVerde = verde
+            )
+
+            TarjetaInicio(
+                emoji = "📚",
+                titulo = "Nuestros programas",
+                descripcion = "Conoce la Escuela Especial Jan Van Dijk y la Red de Inclusión Sociolaboral Alba Lab.",
+                textoBoton = "Descubrir programas",
+                onClick = onProgramasClick,
+                horizontal = horizontal,
+                colorTarjeta = colorTarjeta,
+                colorTexto = textoPrincipal,
+                colorTextoSecundario = textoSecundario,
+                colorVerde = verde
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = verdeSuave)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(18.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Juntos construimos más oportunidades 🌱",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (esOscuro) Color(0xFFB7F0D8) else verde,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Cada persona tiene capacidades, talentos y sueños que merecen ser reconocidos.",
+                        fontSize = 14.sp,
+                        color = if (esOscuro) Color(0xFFE0F2E9) else verde,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 21.sp
+                    )
+                }
+            }
+
+            Button(
+                onClick = onCompartirClick,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = verde,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Compartir CORPALIV",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
         }
 
-        Button(
-            onClick = onCompartirClick,
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = verde,
-                contentColor = Color.White
-            )
-        ) {
-            Text(
-                text = "Compartir CORPALIV",
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
+        // Imagen panorámica al final de Inicio, a todo el ancho disponible.
+        Image(
+            painter = painterResource(id = R.drawable.abajo),
+            contentDescription = "Transformamos vidas: mensaje de inclusión de CORPALIV",
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2048f / 460f),
+            contentScale = ContentScale.Fit
+        )
 
         Spacer(modifier = Modifier.height(4.dp))
     }

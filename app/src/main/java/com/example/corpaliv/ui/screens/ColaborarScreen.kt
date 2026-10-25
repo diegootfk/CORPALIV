@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -41,12 +42,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.corpaliv.R
 import com.example.corpaliv.ui.viewmodel.ColaborarViewModel
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -57,6 +61,53 @@ import java.util.TimeZone
 
 private val VerdeColaborar = Color(0xFF176B50)
 private val FondoColaborar = Color(0xFFF5F7F4)
+private val RosaDonar = Color(0xFFC4317B)
+
+private data class CausaColaborar(
+    val titulo: String,
+    val descripcion: String,
+    val emoji: String,
+    val imagen: Int
+)
+
+private val causasColaborar = listOf(
+    CausaColaborar(
+        "Educación inclusiva",
+        "Apoya oportunidades de aprendizaje y educación.",
+        "📚",
+        R.drawable.educ_inclusiva
+    ),
+    CausaColaborar(
+        "Inclusión laboral",
+        "Contribuye a iniciativas de formación sociolaboral.",
+        "💼",
+        R.drawable.inclusion_laboral
+    ),
+    CausaColaborar(
+        "Talleres y desarrollo de habilidades",
+        "Apoya actividades creativas y de desarrollo personal.",
+        "🎨",
+        R.drawable.taller
+    ),
+    CausaColaborar(
+        "Bienestar y autonomía",
+        "Promueve la autonomía y participación comunitaria.",
+        "🌱",
+        R.drawable.bienestar
+    ),
+    CausaColaborar(
+        "Donación general",
+        "Un aporte de libre elección para apoyar la labor de CORPALIV.",
+        "💚",
+        R.drawable.donaciongeneral
+    )
+)
+
+private val metodosPago = listOf(
+    "Tarjeta de crédito o débito",
+    "Tarjeta de débito o prepago",
+    "Transferencia bancaria"
+)
 
 private fun formatearMontoCLP(valor: String): String {
     val digitos = valor.filter { it.isDigit() }
@@ -75,42 +126,21 @@ fun ColaborarScreen(
 ) {
     var mostrarSelectorFecha by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val colores = MaterialTheme.colorScheme
+
+    val esOscuro = colores.background == Color(0xFF121212)
+    val fondo = if (esOscuro) Color(0xFF121212) else FondoColaborar
+    val verde = if (esOscuro) Color(0xFF278A68) else VerdeColaborar
+    val tarjeta = colores.surface
+    val texto = colores.onSurface
+    val secundario = colores.onSurfaceVariant
 
     val solicitudPermisoNotificaciones =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) {
-            // La solicitud se guarda incluso si se rechaza el permiso.
             modelo.validarYGuardarSolicitud()
         }
-
-    val colores = MaterialTheme.colorScheme
-    val esOscuro = colores.background == Color(0xFF121212)
-    val esAltoContraste = colores.background == Color.White &&
-            colores.onBackground == Color.Black
-
-    val fondo = when {
-        esOscuro -> Color(0xFF121212)
-        esAltoContraste -> Color.White
-        else -> FondoColaborar
-    }
-    val verde = when {
-        esOscuro -> Color(0xFF278A68)
-        esAltoContraste -> Color(0xFF003D2B)
-        else -> VerdeColaborar
-    }
-    val verdeSuave = when {
-        esOscuro -> Color(0xFF263A33)
-        esAltoContraste -> Color(0xFFE8F3EE)
-        else -> Color(0xFFE4F1E9)
-    }
-    val colorTarjeta = colores.surface
-    val textoPrincipal = colores.onSurface
-    val textoSecundario = when {
-        esOscuro -> Color(0xFFD0D0D0)
-        esAltoContraste -> Color.Black
-        else -> colores.onSurfaceVariant
-    }
 
     Column(
         modifier = modifier
@@ -128,275 +158,473 @@ fun ColaborarScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Quiero colaborar",
-                fontSize = 28.sp,
+                text = "Colabora con CORPALIV",
+                fontSize = 27.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
-                text = "Juntos construimos más oportunidades.",
-                fontSize = 15.sp,
+                text = "¡Eres genial! Gracias por tu compromiso 💚",
                 color = Color.White
             )
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = colorTarjeta),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = "¿Por qué elegir CORPALIV?",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = verde
-                )
-                Text(
-                    text = "💚 Inclusión y oportunidades",
-                    fontWeight = FontWeight.SemiBold,
-                    color = textoPrincipal
-                )
-                Text(
-                    text = "Tu colaboración puede apoyar iniciativas educativas y sociolaborales para personas con discapacidad.",
-                    color = textoSecundario
-                )
-                Text(
-                    text = "🤝 Apoyo a las familias",
-                    fontWeight = FontWeight.SemiBold,
-                    color = textoPrincipal
-                )
-                Text(
-                    text = "Contribuye a una comunidad más inclusiva, con mayores oportunidades de participación.",
-                    color = textoSecundario
-                )
-                Text(
-                    text = "🌱 Compromiso con la inclusión",
-                    fontWeight = FontWeight.SemiBold,
-                    color = textoPrincipal
-                )
-                Text(
-                    text = "Cada gesto solidario puede ayudar a impulsar un entorno más accesible y participativo.",
-                    color = textoSecundario
-                )
-            }
-        }
+        if (modelo.causaSeleccionada.isBlank()) {
+            Text(
+                "Elige una causa",
+                fontSize = 23.sp,
+                fontWeight = FontWeight.Bold,
+                color = verde
+            )
+            Text(
+                "Selecciona la causa con la que te gustaría colaborar.",
+                color = secundario
+            )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = colorTarjeta),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Text(
-                    text = "Registrar aporte solidario",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = verde
-                )
-                Text(
-                    text = "Completa tus datos para registrar tu interés. Esta aplicación no procesa pagos.",
-                    color = textoSecundario
-                )
-
-                OutlinedTextField(
-                    value = modelo.nombre,
-                    onValueChange = {
-                        modelo.nombre = it
-                        modelo.mensaje = ""
-                    },
-                    label = { Text("Nombre o empresa") },
+            causasColaborar.forEach { causa ->
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = modelo.errorNombre,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = verde,
-                        focusedLabelColor = verde,
-                        cursorColor = verde
-                    )
-                )
-                if (modelo.errorNombre) {
-                    Text("Ingresa tu nombre o empresa.", color = MaterialTheme.colorScheme.error)
-                }
-
-                OutlinedTextField(
-                    value = modelo.rut,
-                    onValueChange = modelo::actualizarRut,
-                    label = { Text("RUT") },
-                    placeholder = { Text("12.345.678-5") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = modelo.errorRut,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = verde,
-                        focusedLabelColor = verde,
-                        cursorColor = verde
-                    )
-                )
-                if (modelo.errorRut) {
-                    Text("Ingresa un RUT chileno válido.", color = MaterialTheme.colorScheme.error)
-                }
-
-                OutlinedTextField(
-                    value = modelo.correo,
-                    onValueChange = {
-                        modelo.correo = it
-                        modelo.mensaje = ""
-                    },
-                    label = { Text("Correo electrónico") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = modelo.errorCorreo,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = verde,
-                        focusedLabelColor = verde,
-                        cursorColor = verde
-                    )
-                )
-                if (modelo.errorCorreo) {
-                    Text("Ingresa un correo válido.", color = MaterialTheme.colorScheme.error)
-                }
-
-                OutlinedTextField(
-                    value = formatearMontoCLP(modelo.aporte),
-                    onValueChange = { valor ->
-                        modelo.aporte = valor.filter { it.isDigit() }
-                        modelo.mensaje = ""
-                    },
-                    label = { Text("Monto del aporte (CLP)") },
-                    placeholder = { Text("Ej. 32.500") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = modelo.errorAporte,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = verde,
-                        focusedLabelColor = verde,
-                        cursorColor = verde
-                    )
-                )
-                if (modelo.errorAporte) {
-                    Text("Ingresa un aporte mayor que cero.", color = MaterialTheme.colorScheme.error)
-                }
-
-                Text(
-                    text = "Fecha de colaboración",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = textoPrincipal
-                )
-                OutlinedButton(
-                    onClick = { mostrarSelectorFecha = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = verde)
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = tarjeta
+                    ),
+                    elevation = CardDefaults.cardElevation(3.dp)
                 ) {
-                    Text(if (modelo.fecha.isBlank()) "Seleccionar fecha" else modelo.fecha)
-                }
-                if (modelo.errorFecha) {
-                    Text("Selecciona una fecha válida.", color = MaterialTheme.colorScheme.error)
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = modelo.anonima,
-                        onCheckedChange = {
-                            modelo.anonima = it
-                            modelo.mensaje = ""
-                        }
-                    )
-                    Text(
-                        text = "Quiero que mi aporte sea anónimo",
-                        modifier = Modifier.weight(1f),
-                        color = textoPrincipal
-                    )
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = modelo.aceptaCondiciones,
-                        onCheckedChange = {
-                            modelo.aceptaCondiciones = it
-                            modelo.mensaje = ""
-                        }
-                    )
-                    Text(
-                        text = "Acepto las condiciones de colaboración",
-                        modifier = Modifier.weight(1f),
-                        color = textoPrincipal
-                    )
-                }
-                if (modelo.errorCondiciones) {
-                    Text("Debes aceptar las condiciones.", color = MaterialTheme.colorScheme.error)
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Deseo recibir novedades",
-                        modifier = Modifier.weight(1f),
-                        color = textoPrincipal
-                    )
-                    Switch(
-                        checked = modelo.recibirNovedades,
-                        onCheckedChange = {
-                            modelo.recibirNovedades = it
-                            modelo.mensaje = ""
-                        }
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        if (modelo.validarSolicitud()) {
-                            if (
-                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                                ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.POST_NOTIFICATIONS
-                                ) != PackageManager.PERMISSION_GRANTED
-                            ) {
-                                solicitudPermisoNotificaciones.launch(
-                                    Manifest.permission.POST_NOTIFICATIONS
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = causa.imagen),
+                            contentDescription = causa.titulo,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                        Column(
+                            modifier = Modifier.padding(18.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(causa.emoji, fontSize = 32.sp)
+                            Text(
+                                causa.titulo,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = verde
+                            )
+                            Text(causa.descripcion, color = secundario)
+                            Button(
+                                onClick = { modelo.seleccionarCausa(causa.titulo) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = verde
                                 )
-                            } else {
-                                modelo.validarYGuardarSolicitud()
+                            ) {
+                                Text("Donar a esta causa")
                             }
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    enabled = !modelo.guardando,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = verde,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(14.dp)
+                    }
+                }
+            }
+        } else {
+            TextButton(onClick = { modelo.volverACausas() }) {
+                Text("← Cambiar causa", color = verde)
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = tarjeta),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Column(Modifier.padding(18.dp)) {
+                    val imagenSeleccionada = causasColaborar
+                        .firstOrNull { it.titulo == modelo.causaSeleccionada }
+                        ?.imagen
+
+                    if (imagenSeleccionada != null) {
+                        Image(
+                            painter = painterResource(id = imagenSeleccionada),
+                            contentDescription = modelo.causaSeleccionada,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(Modifier.height(12.dp))
+                    }
+
+                    Text("Tu causa", color = secundario)
+                    Text(
+                        modelo.causaSeleccionada,
+                        color = verde,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                    if (modelo.causaSeleccionada == "Educación inclusiva") {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "La educación inclusiva es fundamental para que " +
+                                    "niños, niñas y jóvenes con discapacidad múltiple y " +
+                                    "sordoceguera puedan desarrollar al máximo sus capacidades.\n\n" +
+                                    "En CORPALIV, a través de la Escuela Especial Jan Van Dijk, " +
+                                    "se entrega una educación especializada que considera " +
+                                    "las necesidades, habilidades y formas de comunicación " +
+                                    "de cada estudiante, promoviendo su autonomía, aprendizaje " +
+                                    "y participación en la sociedad.\n\n" +
+                                    "Tu aporte contribuye a fortalecer las oportunidades de " +
+                                    "aprendizaje, el desarrollo de habilidades y la construcción " +
+                                    "de un futuro con mayor inclusión y bienestar.",
+                            color = secundario,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
+                    if (modelo.causaSeleccionada == "Inclusión laboral") {
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = "La inclusión laboral permite que las personas con " +
+                                    "discapacidad desarrollen sus capacidades, fortalezcan " +
+                                    "su autonomía y participen activamente en el mundo del trabajo.\n\n" +
+                                    "En CORPALIV, a través de Alba Lab, se promueve la formación " +
+                                    "sociolaboral mediante experiencias que potencian las habilidades " +
+                                    "sociales, emocionales y laborales. Además, se impulsa la " +
+                                    "elaboración de productos y el desarrollo de competencias que " +
+                                    "favorecen la participación y la inclusión en entornos laborales.\n\n" +
+                                    "Tu aporte contribuye a abrir oportunidades, fortalecer la " +
+                                    "independencia y construir una sociedad donde todas las personas " +
+                                    "puedan desarrollar sus talentos y sentirse parte de ella.",
+                            color = secundario,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
+                    if (modelo.causaSeleccionada == "Talleres y desarrollo de habilidades") {
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = "Los talleres son espacios de aprendizaje, creatividad y " +
+                                    "desarrollo personal que permiten a niños, niñas y jóvenes " +
+                                    "fortalecer sus habilidades y descubrir nuevas formas de expresarse.\n\n" +
+                                    "En CORPALIV se promueven experiencias que potencian las " +
+                                    "capacidades de cada persona mediante actividades adaptadas " +
+                                    "a sus necesidades, favoreciendo la participación, la autonomía " +
+                                    "y el trabajo colaborativo.\n\n" +
+                                    "Tu aporte ayuda a impulsar oportunidades para aprender, crear " +
+                                    "y desarrollar nuevas habilidades, construyendo un entorno donde " +
+                                    "cada persona pueda crecer y alcanzar su máximo potencial.",
+                            color = secundario,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
+                    if (modelo.causaSeleccionada == "Bienestar y autonomía") {
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = "El bienestar y la autonomía son fundamentales para que " +
+                                    "niños, niñas y jóvenes con discapacidad puedan desarrollar " +
+                                    "sus capacidades, fortalecer su independencia y participar " +
+                                    "activamente en su entorno.\n\n" +
+                                    "En CORPALIV se promueve el desarrollo integral de cada persona, " +
+                                    "respetando sus necesidades y potenciando sus habilidades para " +
+                                    "favorecer una mayor autonomía en la vida cotidiana, la " +
+                                    "comunicación y la participación social.\n\n" +
+                                    "Tu aporte ayuda a impulsar oportunidades para que cada persona " +
+                                    "pueda desarrollar sus habilidades, tomar parte en su comunidad " +
+                                    "y avanzar hacia una vida con mayor independencia, bienestar " +
+                                    "e inclusión.",
+                            color = secundario,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+
+                    if (modelo.causaSeleccionada == "Donación general") {
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = "Cada aporte es una oportunidad para seguir construyendo " +
+                                    "una sociedad más inclusiva, donde niños, niñas y jóvenes " +
+                                    "con discapacidad múltiple y sordoceguera puedan desarrollar " +
+                                    "sus capacidades y participar activamente en la comunidad.\n\n" +
+                                    "En CORPALIV trabajamos para promover la educación especializada, " +
+                                    "el desarrollo integral, la autonomía y la inclusión social " +
+                                    "y laboral, acompañando a cada persona de acuerdo con sus " +
+                                    "necesidades y habilidades.\n\n" +
+                                    "Tu donación, sin importar su monto, representa un gesto de " +
+                                    "solidaridad que contribuye a fortalecer esta labor y a generar " +
+                                    "nuevas oportunidades para las personas y sus familias. Gracias " +
+                                    "por ser parte de una comunidad que cree en la inclusión.",
+                            color = secundario,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = tarjeta),
+                shape = RoundedCornerShape(22.dp),
+                elevation = CardDefaults.cardElevation(3.dp)
+            ) {
+                Column(
+                    Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Text(
-                        text = if (modelo.guardando) "Guardando..." else "Registrar mi interés"
+                        "Tu aporte hace la diferencia",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = verde
                     )
-                }
-
-                if (modelo.mensaje.isNotBlank()) {
-                    val esExito = modelo.mensaje == "¡Solicitud guardada correctamente!"
                     Text(
-                        text = modelo.mensaje,
-                        color = if (esExito) verde else MaterialTheme.colorScheme.error
+                        "Ingresa el monto que quieres donar",
+                        fontWeight = FontWeight.SemiBold,
+                        color = texto
                     )
+                    OutlinedTextField(
+                        value = formatearMontoCLP(modelo.aporte),
+                        onValueChange = { valor ->
+                            modelo.aporte = valor.filter { it.isDigit() }
+                            modelo.mensaje = ""
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Ej. 10.000") },
+                        suffix = { Text("CLP") },
+                        singleLine = true,
+                        isError = modelo.errorAporte
+                    )
+                    if (modelo.errorAporte) {
+                        TextoError("Ingresa un monto mayor que cero.")
+                    }
+
+                    Text("Tus datos", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = verde)
+
+                    OutlinedTextField(
+                        value = modelo.nombre,
+                        onValueChange = {
+                            modelo.nombre = it
+                            modelo.mensaje = ""
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Nombre") },
+                        singleLine = true,
+                        isError = modelo.errorNombre
+                    )
+                    if (modelo.errorNombre) {
+                        TextoError("Ingresa tu nombre.")
+                    }
+
+                    OutlinedTextField(
+                        value = modelo.apellidos,
+                        onValueChange = {
+                            modelo.apellidos = it
+                            modelo.mensaje = ""
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Apellidos") },
+                        singleLine = true,
+                        isError = modelo.errorApellidos
+                    )
+                    if (modelo.errorApellidos) {
+                        TextoError("Ingresa tus apellidos.")
+                    }
+
+                    OutlinedTextField(
+                        value = modelo.rut,
+                        onValueChange = modelo::actualizarRut,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("RUT") },
+                        placeholder = { Text("12.345.678-5") },
+                        singleLine = true,
+                        isError = modelo.errorRut
+                    )
+                    if (modelo.errorRut) {
+                        TextoError("Ingresa un RUT chileno válido.")
+                    }
+
+                    OutlinedTextField(
+                        value = modelo.correo,
+                        onValueChange = {
+                            modelo.correo = it
+                            modelo.mensaje = ""
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Correo electrónico") },
+                        placeholder = { Text("correo@ejemplo.com") },
+                        singleLine = true,
+                        isError = modelo.errorCorreo
+                    )
+                    if (modelo.errorCorreo) {
+                        TextoError("Ingresa un correo válido.")
+                    }
+
+                    Text(
+                        "¿Quieres hacerte socio con un aporte mensual?",
+                        fontWeight = FontWeight.SemiBold,
+                        color = texto
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = modelo.aporteMensual,
+                            onClick = { modelo.aporteMensual = true }
+                        )
+                        Text("Sí 💗", color = texto)
+                        Spacer(Modifier.height(1.dp))
+                        RadioButton(
+                            selected = !modelo.aporteMensual,
+                            onClick = { modelo.aporteMensual = false }
+                        )
+                        Text("No", color = texto)
+                    }
+
+                    Text(
+                        "Selecciona medio de pago",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = verde
+                    )
+                    metodosPago.forEach { metodo ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (modelo.metodoPago == metodo) {
+                                    Color(0xFFE4F1E9)
+                                } else {
+                                    tarjeta
+                                }
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = modelo.metodoPago == metodo,
+                                    onClick = { modelo.metodoPago = metodo }
+                                )
+                                Text(
+                                    metodo,
+                                    modifier = Modifier.weight(1f),
+                                    color = texto
+                                )
+                            }
+                        }
+                    }
+                    if (modelo.errorMetodoPago) {
+                        TextoError("Selecciona un medio de pago.")
+                    }
+
+                    Text(
+                        "Fecha de colaboración",
+                        fontWeight = FontWeight.SemiBold,
+                        color = texto
+                    )
+                    OutlinedButton(
+                        onClick = { mostrarSelectorFecha = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            if (modelo.fecha.isBlank()) {
+                                "Seleccionar fecha"
+                            } else {
+                                modelo.fecha
+                            }
+                        )
+                    }
+                    if (modelo.errorFecha) {
+                        TextoError("Selecciona una fecha.")
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = modelo.recibirNovedades,
+                            onCheckedChange = { modelo.recibirNovedades = it }
+                        )
+                        Text(
+                            "Acepto recibir comunicaciones de CORPALIV.",
+                            color = texto
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = modelo.aceptaCondiciones,
+                            onCheckedChange = {
+                                modelo.aceptaCondiciones = it
+                                modelo.mensaje = ""
+                            }
+                        )
+                        Text(
+                            "He leído y acepto los términos y condiciones.",
+                            color = texto
+                        )
+                    }
+                    if (modelo.errorCondiciones) {
+                        TextoError("Debes aceptar las condiciones.")
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = modelo.anonima,
+                            onCheckedChange = { modelo.anonima = it }
+                        )
+                        Text("Quiero que mi aporte sea anónimo.", color = texto)
+                    }
+
+                    Button(
+                        onClick = {
+                            if (modelo.validarSolicitud()) {
+                                if (
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    solicitudPermisoNotificaciones.launch(
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                } else {
+                                    modelo.validarYGuardarSolicitud()
+                                }
+                            } else {
+                                modelo.mensaje = ""
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        enabled = !modelo.guardando,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = RosaDonar,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text(
+                            if (modelo.guardando) "Guardando..." else "Donar",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    if (modelo.mensaje.isNotBlank()) {
+                        Text(
+                            modelo.mensaje,
+                            color = if (
+                                modelo.mensaje == "¡Solicitud guardada correctamente!"
+                            ) verde else MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }
-
     }
 
     if (mostrarSelectorFecha) {
@@ -409,6 +637,7 @@ fun ColaborarScreen(
                 set(Calendar.MILLISECOND, 0)
             }.timeInMillis
         }
+
         val estadoFecha = rememberDatePickerState(
             selectableDates = object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
@@ -455,4 +684,12 @@ fun ColaborarScreen(
             DatePicker(state = estadoFecha)
         }
     }
+}
+
+@Composable
+private fun TextoError(texto: String) {
+    Text(
+        text = texto,
+        color = MaterialTheme.colorScheme.error
+    )
 }

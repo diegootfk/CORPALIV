@@ -3,6 +3,7 @@ package com.example.corpaliv.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -68,6 +69,7 @@ fun ContactoScreen(
     )
 
     var fotoCapturada by remember { mutableStateOf<Bitmap?>(null) }
+    val context = LocalContext.current
 
     val lanzadorCamara = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
@@ -75,7 +77,20 @@ fun ContactoScreen(
         if (bitmap != null) fotoCapturada = bitmap
     }
 
-    val context = LocalContext.current
+    val lanzadorGaleria = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    fotoCapturada = BitmapFactory.decodeStream(input)
+                }
+            } catch (_: Exception) {
+                fotoCapturada = null
+            }
+        }
+    }
+
     val lanzadorPermisoNotificaciones =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
@@ -307,21 +322,37 @@ fun ContactoScreen(
                     color = verde
                 )
                 Text(
-                    text = "Puedes tomar una fotografía para acompañar visualmente tu consulta. La imagen se mostrará como vista previa temporal.",
+                    text = "Puedes tomar una fotografía o seleccionar una imagen de tu galería para acompañar visualmente tu consulta. La imagen se mostrará como vista previa temporal.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = textoSecundario,
                     lineHeight = 21.sp
                 )
 
-                OutlinedButton(
-                    onClick = { lanzadorCamara.launch(null) },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
-                        contentColor = verde
-                    )
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text(if (fotoCapturada == null) "📷  Abrir cámara" else "Tomar otra fotografía")
+                    OutlinedButton(
+                        onClick = { lanzadorCamara.launch(null) },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                            contentColor = verde
+                        )
+                    ) {
+                        Text("📷 Cámara")
+                    }
+
+                    OutlinedButton(
+                        onClick = { lanzadorGaleria.launch("image/*") },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                            contentColor = verde
+                        )
+                    ) {
+                        Text("🖼️ Galería")
+                    }
                 }
 
                 fotoCapturada?.let { bitmap ->
