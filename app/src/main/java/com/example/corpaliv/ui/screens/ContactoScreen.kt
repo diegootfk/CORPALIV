@@ -401,29 +401,6 @@ fun ContactoScreen(
             }
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = verdeSuave)
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Gracias por querer colaborar",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (esOscuro) Color(0xFFB7F0D8) else verde,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "El registro se almacena localmente en el dispositivo. Esta aplicación no envía la consulta a CORPALIV automáticamente.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (esOscuro) Color(0xFFE0F2E9) else textoPrincipal
-                )
-            }
-        }
-
         Spacer(modifier = Modifier.height(6.dp))
     }
 }

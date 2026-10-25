@@ -397,11 +397,6 @@ fun ColaborarScreen(
             }
         }
 
-        Text(
-            text = "El registro se almacena localmente en el dispositivo. No se realiza ningún cobro ni se envía una donación a CORPALIV.",
-            style = MaterialTheme.typography.bodySmall,
-            color = textoSecundario
-        )
     }
 
     if (mostrarSelectorFecha) {
