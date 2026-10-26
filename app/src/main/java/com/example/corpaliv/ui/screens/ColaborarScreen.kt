@@ -58,6 +58,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.isSystemInDarkTheme
 
 private val VerdeColaborar = Color(0xFF176B50)
 private val FondoColaborar = Color(0xFFF5F7F4)
@@ -128,7 +135,7 @@ fun ColaborarScreen(
     val context = LocalContext.current
     val colores = MaterialTheme.colorScheme
 
-    val esOscuro = colores.background == Color(0xFF121212)
+    val esOscuro = isSystemInDarkTheme()
     val fondo = if (esOscuro) Color(0xFF121212) else FondoColaborar
     val verde = if (esOscuro) Color(0xFF278A68) else VerdeColaborar
     val tarjeta = colores.surface
@@ -385,7 +392,7 @@ fun ColaborarScreen(
                         color = texto
                     )
                     OutlinedTextField(
-                        value = formatearMontoCLP(modelo.aporte),
+                        value = modelo.aporte,
                         onValueChange = { valor ->
                             modelo.aporte = valor.filter { it.isDigit() }
                             modelo.mensaje = ""
@@ -394,7 +401,9 @@ fun ColaborarScreen(
                         placeholder = { Text("Ej. 10.000") },
                         suffix = { Text("CLP") },
                         singleLine = true,
-                        isError = modelo.errorAporte
+                        isError = modelo.errorAporte,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        visualTransformation = remember { ClpVisualTransformation() }
                     )
                     if (modelo.errorAporte) {
                         TextoError("Ingresa un monto mayor que cero.")
@@ -439,7 +448,8 @@ fun ColaborarScreen(
                         label = { Text("RUT") },
                         placeholder = { Text("12.345.678-5") },
                         singleLine = true,
-                        isError = modelo.errorRut
+                        isError = modelo.errorRut,
+                        visualTransformation = remember { RutVisualTransformation() }
                     )
                     if (modelo.errorRut) {
                         TextoError("Ingresa un RUT chileno válido.")
@@ -487,16 +497,26 @@ fun ColaborarScreen(
                         color = verde
                     )
                     metodosPago.forEach { metodo ->
+                        val estaSeleccionado = modelo.metodoPago == metodo
+
+                        // Color de fondo adaptado para modo claro y modo oscuro
+                        val fondoTarjeta = when {
+                            estaSeleccionado && esOscuro -> Color(0xFF1E3F33) // Verde oscuro para dark mode
+                            estaSeleccionado -> Color(0xFFE4F1E9)             // Verde claro para light mode
+                            else -> tarjeta
+                        }
+
+                        // Color del texto ajustado para mantener alto contraste
+                        val colorTexto = when {
+                            estaSeleccionado && esOscuro -> Color.White
+                            estaSeleccionado -> VerdeColaborar
+                            else -> texto
+                        }
+
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (modelo.metodoPago == metodo) {
-                                    Color(0xFFE4F1E9)
-                                } else {
-                                    tarjeta
-                                }
-                            )
+                            colors = CardDefaults.cardColors(containerColor = fondoTarjeta)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -505,13 +525,13 @@ fun ColaborarScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
-                                    selected = modelo.metodoPago == metodo,
+                                    selected = estaSeleccionado,
                                     onClick = { modelo.metodoPago = metodo }
                                 )
                                 Text(
                                     metodo,
                                     modifier = Modifier.weight(1f),
-                                    color = texto
+                                    color = colorTexto
                                 )
                             }
                         }
@@ -692,4 +712,94 @@ private fun TextoError(texto: String) {
         text = texto,
         color = MaterialTheme.colorScheme.error
     )
+}
+
+class RutVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val raw = text.text
+        if (raw.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
+
+        val formatted = if (raw.length <= 1) {
+            raw
+        } else {
+            val cuerpo = raw.dropLast(1)
+            val dv = raw.last()
+            val cuerpoConPuntos = cuerpo.reversed()
+                .chunked(3)
+                .joinToString(".")
+                .reversed()
+            "$cuerpoConPuntos-$dv"
+        }
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset <= 0) return 0
+                if (offset > raw.length) return formatted.length
+
+                var transformedOffset = 0
+                var rawCount = 0
+                for (char in formatted) {
+                    if (rawCount == offset) break
+                    if (char.isLetterOrDigit()) rawCount++
+                    transformedOffset++
+                }
+                return transformedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                if (offset <= 0) return 0
+                if (offset > formatted.length) return raw.length
+
+                var rawOffset = 0
+                for (i in 0 until offset.coerceAtMost(formatted.length)) {
+                    if (formatted[i].isLetterOrDigit()) rawOffset++
+                }
+                return rawOffset
+            }
+        }
+
+        return TransformedText(AnnotatedString(formatted), offsetMapping)
+    }
+}
+
+class ClpVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val raw = text.text.filter { it.isDigit() }
+        if (raw.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
+
+        val numero = raw.toLongOrNull() ?: return TransformedText(text, OffsetMapping.Identity)
+        val simbolos = DecimalFormatSymbols(Locale("es", "CL")).apply {
+            groupingSeparator = '.'
+        }
+        val formatted = DecimalFormat("#,###", simbolos).format(numero)
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset <= 0) return 0
+                if (offset > raw.length) return formatted.length
+
+                var transformedOffset = 0
+                var digitCount = 0
+                for (char in formatted) {
+                    if (digitCount == offset) break
+                    if (char.isDigit()) digitCount++
+                    transformedOffset++
+                }
+                return transformedOffset
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                if (offset <= 0) return 0
+                if (offset > formatted.length) return raw.length
+
+                var rawOffset = 0
+                for (i in 0 until offset.coerceAtMost(formatted.length)) {
+                    if (formatted[i].isDigit()) rawOffset++
+                }
+                return rawOffset
+            }
+        }
+
+        return TransformedText(AnnotatedString(formatted), offsetMapping)
+    }
 }
