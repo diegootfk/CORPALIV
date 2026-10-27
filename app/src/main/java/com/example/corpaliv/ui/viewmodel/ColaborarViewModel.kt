@@ -64,21 +64,10 @@ class ColaborarViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun actualizarRut(valor: String) {
-        val limpio = valor.uppercase(Locale.ROOT)
-            .filter { it.isDigit() || it == 'K' }
-            .take(9)
-
-        rut = if (limpio.length <= 1) {
-            limpio
-        } else {
-            val cuerpo = limpio.dropLast(1)
-            val digito = limpio.last()
-            val cuerpoConPuntos = cuerpo.reversed()
-                .chunked(3)
-                .joinToString(".")
-                .reversed()
-            "$cuerpoConPuntos-$digito"
-        }
+        val mayus = valor.uppercase(Locale.ROOT)
+        rut = mayus.filterIndexed { index, char ->
+            char.isDigit() || (char == 'K' && index == mayus.length - 1)
+        }.take(9)
 
         errorRut = false
         mensaje = ""
