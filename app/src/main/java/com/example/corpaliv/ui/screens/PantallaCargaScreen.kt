@@ -3,8 +3,15 @@ package com.example.corpaliv.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +26,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -47,6 +54,20 @@ fun PantallaCargaScreen(
     onComenzar: () -> Unit
 ) {
     var mostrarMensaje by remember { mutableStateOf(false) }
+
+    val transicion = rememberInfiniteTransition(label = "corazon")
+    val escala by transicion.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.12f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 900,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "latidoCorazon"
+    )
 
     Box(
         modifier = Modifier
@@ -97,21 +118,23 @@ fun PantallaCargaScreen(
                 modifier = Modifier
                     .size(104.dp)
                     .clip(RoundedCornerShape(28.dp))
-                    .background(VerdeClaroCarga),
+                    .background(VerdeClaroCarga)
+                    .clickable { mostrarMensaje = !mostrarMensaje },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "💚",
-                    fontSize = 52.sp
+                    fontSize = 52.sp,
+                    modifier = Modifier.scale(escala)
                 )
             }
 
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Cada persona importa",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                text = "Toca el corazón",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = VerdeCarga
             )
 
