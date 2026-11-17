@@ -14,9 +14,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,23 +38,24 @@ fun AppDrawer(
     val configuracion = LocalConfiguration.current
     val colores = MaterialTheme.colorScheme
     val modoOscuro = colores.background == Color(0xFF121212)
-    val altoContraste = colores.background == Color.White && colores.onBackground == Color.Black
+    val altoContraste = colores.background == Color.Black
 
     val fondoMenu = when {
+        altoContraste -> Color.Black
         modoOscuro -> Color(0xFF121212)
-        altoContraste -> Color.White
         else -> Color(0xFFF5F7F4)
     }
     val verdeMenu = when {
+        altoContraste -> Color(0xFFFFFF00)
         modoOscuro -> Color(0xFF66D6A5)
-        altoContraste -> Color(0xFF003D2B)
         else -> Color(0xFF176B50)
     }
     val verdeSeleccionado = when {
+        altoContraste -> Color(0xFFFFFF00)
         modoOscuro -> Color(0xFF263A33)
-        altoContraste -> Color(0xFFE8F3EE)
         else -> Color(0xFFDCEFE4)
     }
+    val textoSeleccionado = if (altoContraste) Color.Black else verdeMenu
     val textoMenu = colores.onSurface
     val textoSecundario = colores.onSurfaceVariant
     val horizontal = configuracion.screenWidthDp > configuracion.screenHeightDp
@@ -156,7 +157,7 @@ fun AppDrawer(
                 colors = NavigationDrawerItemDefaults.colors(
                     selectedContainerColor = verdeSeleccionado,
                     unselectedContainerColor = Color.Transparent,
-                    selectedTextColor = verdeMenu,
+                    selectedTextColor = textoSeleccionado,
                     unselectedTextColor = textoMenu
                 )
             )

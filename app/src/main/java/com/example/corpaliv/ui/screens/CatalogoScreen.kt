@@ -49,32 +49,31 @@ fun CatalogoScreen(
 
     val colores = MaterialTheme.colorScheme
     val esOscuro = colores.background == Color(0xFF121212)
-    val esAltoContraste = colores.background == Color.White &&
-            colores.onBackground == Color.Black
+    val esAltoContraste = colores.background == Color.Black
 
     val fondo = when {
+        esAltoContraste -> Color.Black
         esOscuro -> Color(0xFF121212)
-        esAltoContraste -> Color.White
         else -> FondoCorpaliv
     }
     val verde = when {
+        esAltoContraste -> Color(0xFFFFFF00)
         esOscuro -> Color(0xFF278A68)
-        esAltoContraste -> Color(0xFF003D2B)
         else -> VerdeCorpaliv
     }
+    val textoSobreVerde = if (esAltoContraste) Color.Black else Color.White
     val verdeClaro = when {
+        esAltoContraste -> Color(0xFF1A1A1A)
         esOscuro -> Color(0xFF263A33)
-        esAltoContraste -> Color(0xFFE8F3EE)
         else -> VerdeClaro
     }
     val textoPrincipal = colores.onSurface
     val textoSecundario = when {
+        esAltoContraste -> Color.White
         esOscuro -> Color(0xFFD0D0D0)
-        esAltoContraste -> Color.Black
         else -> colores.onSurfaceVariant
     }
     val colorTarjeta = colores.surface
-    val colorTextoBoton = Color.White
 
     Column(
         modifier = modifier
@@ -95,13 +94,13 @@ fun CatalogoScreen(
             ) {
                 Text(
                     text = "CORPALIV",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = textoSobreVerde.copy(alpha = 0.9f),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "El impacto de incluir",
-                    color = Color.White,
+                    color = textoSobreVerde,
                     fontSize = 27.sp,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 33.sp
@@ -110,7 +109,7 @@ fun CatalogoScreen(
                     text = "Conoce cómo la inclusión, las oportunidades " +
                             "y la colaboración pueden contribuir a una " +
                             "sociedad más accesible.",
-                    color = Color.White,
+                    color = textoSobreVerde,
                     fontSize = 15.sp,
                     lineHeight = 23.sp
                 )
@@ -223,7 +222,7 @@ fun CatalogoScreen(
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = verde,
-                        contentColor = colorTextoBoton
+                        contentColor = textoSobreVerde
                     )
                 ) {
                     Text(if (mostrarHistoria) "Leer menos" else "Conocer su historia")
@@ -343,7 +342,9 @@ private fun TarjetaImpacto(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {

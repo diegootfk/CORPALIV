@@ -32,20 +32,20 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F)
 )
 
-// Paleta con contraste elevado para facilitar la lectura.
-private val HighContrastLightColorScheme = lightColorScheme(
-    primary = Color(0xFF003D2B),
-    onPrimary = Color.White,
-    secondary = Color(0xFF002B49),
-    onSecondary = Color.White,
-    tertiary = Color(0xFF5A2600),
-    onTertiary = Color.White,
-    background = Color.White,
-    onBackground = Color.Black,
-    surface = Color.White,
-    onSurface = Color.Black,
-    error = Color(0xFFB00020),
-    onError = Color.White
+// Paleta con contraste elevado (fondo negro, texto blanco y acento amarillo)
+private val HighContrastColorScheme = darkColorScheme(
+    primary = Color(0xFFFFFF00),
+    onPrimary = Color.Black,
+    secondary = Color(0xFFFFFF00),
+    onSecondary = Color.Black,
+    tertiary = Color(0xFF00FFFF),
+    onTertiary = Color.Black,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color.Black,
+    onSurface = Color.White,
+    error = Color(0xFFFF5252),
+    onError = Color.Black
 )
 
 @Composable
@@ -55,7 +55,7 @@ fun CORPALIVTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        highContrast -> HighContrastLightColorScheme
+        highContrast -> HighContrastColorScheme
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

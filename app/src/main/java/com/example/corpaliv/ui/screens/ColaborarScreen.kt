@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,7 +31,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -45,7 +45,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -58,13 +63,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.isSystemInDarkTheme
 
 private val VerdeColaborar = Color(0xFF176B50)
 private val FondoColaborar = Color(0xFFF5F7F4)
@@ -135,12 +133,27 @@ fun ColaborarScreen(
     val context = LocalContext.current
     val colores = MaterialTheme.colorScheme
 
-    val esOscuro = isSystemInDarkTheme()
-    val fondo = if (esOscuro) Color(0xFF121212) else FondoColaborar
-    val verde = if (esOscuro) Color(0xFF278A68) else VerdeColaborar
+    val esOscuro = colores.background == Color(0xFF121212)
+    val esAltoContraste = colores.background == Color.Black
+
+    val fondo = when {
+        esAltoContraste -> Color.Black
+        esOscuro -> Color(0xFF121212)
+        else -> FondoColaborar
+    }
+    val verde = when {
+        esAltoContraste -> Color(0xFFFFFF00)
+        esOscuro -> Color(0xFF278A68)
+        else -> VerdeColaborar
+    }
+    val textoSobreVerde = if (esAltoContraste) Color.Black else Color.White
     val tarjeta = colores.surface
     val texto = colores.onSurface
-    val secundario = colores.onSurfaceVariant
+    val secundario = when {
+        esAltoContraste -> Color.White
+        esOscuro -> Color(0xFFD0D0D0)
+        else -> colores.onSurfaceVariant
+    }
 
     val solicitudPermisoNotificaciones =
         rememberLauncherForActivityResult(
@@ -168,12 +181,12 @@ fun ColaborarScreen(
                 text = "Colabora con CORPALIV",
                 fontSize = 27.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = textoSobreVerde
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 text = "¡Eres genial! Gracias por tu compromiso 💚",
-                color = Color.White
+                color = textoSobreVerde
             )
         }
 
@@ -225,7 +238,8 @@ fun ColaborarScreen(
                                 onClick = { modelo.seleccionarCausa(causa.titulo) },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = verde
+                                    containerColor = verde,
+                                    contentColor = textoSobreVerde
                                 )
                             ) {
                                 Text("Donar a esta causa")
@@ -499,15 +513,15 @@ fun ColaborarScreen(
                     metodosPago.forEach { metodo ->
                         val estaSeleccionado = modelo.metodoPago == metodo
 
-                        // Color de fondo adaptado para modo claro y modo oscuro
                         val fondoTarjeta = when {
-                            estaSeleccionado && esOscuro -> Color(0xFF1E3F33) // Verde oscuro para dark mode
-                            estaSeleccionado -> Color(0xFFE4F1E9)             // Verde claro para light mode
+                            estaSeleccionado && esAltoContraste -> Color(0xFF1A1A1A)
+                            estaSeleccionado && esOscuro -> Color(0xFF1E3F33)
+                            estaSeleccionado -> Color(0xFFE4F1E9)
                             else -> tarjeta
                         }
 
-                        // Color del texto ajustado para mantener alto contraste
                         val colorTexto = when {
+                            estaSeleccionado && esAltoContraste -> Color(0xFFFFFF00)
                             estaSeleccionado && esOscuro -> Color.White
                             estaSeleccionado -> VerdeColaborar
                             else -> texto
@@ -547,7 +561,10 @@ fun ColaborarScreen(
                     )
                     OutlinedButton(
                         onClick = { mostrarSelectorFecha = true },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = verde
+                        )
                     ) {
                         Text(
                             if (modelo.fecha.isBlank()) {
@@ -622,8 +639,8 @@ fun ColaborarScreen(
                             .height(54.dp),
                         enabled = !modelo.guardando,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = RosaDonar,
-                            contentColor = Color.White
+                            containerColor = if (esAltoContraste) verde else RosaDonar,
+                            contentColor = if (esAltoContraste) textoSobreVerde else Color.White
                         ),
                         shape = RoundedCornerShape(14.dp)
                     ) {
@@ -714,92 +731,73 @@ private fun TextoError(texto: String) {
     )
 }
 
-class RutVisualTransformation : VisualTransformation {
+private class ClpVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val raw = text.text
-        if (raw.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
-
-        val formatted = if (raw.length <= 1) {
-            raw
-        } else {
-            val cuerpo = raw.dropLast(1)
-            val dv = raw.last()
-            val cuerpoConPuntos = cuerpo.reversed()
-                .chunked(3)
-                .joinToString(".")
-                .reversed()
-            "$cuerpoConPuntos-$dv"
+        val original = text.text.filter { it.isDigit() }
+        if (original.isEmpty()) {
+            return TransformedText(AnnotatedString(""), OffsetMapping.Identity)
         }
-
+        val formateado = formatearMontoCLP(original)
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                if (offset <= 0) return 0
-                if (offset > raw.length) return formatted.length
-
-                var transformedOffset = 0
-                var rawCount = 0
-                for (char in formatted) {
-                    if (rawCount == offset) break
-                    if (char.isLetterOrDigit()) rawCount++
-                    transformedOffset++
+                val clamped = offset.coerceIn(0, original.length)
+                if (clamped == 0) return 0
+                var digitosVistos = 0
+                for (i in formateado.indices) {
+                    if (formateado[i].isDigit()) {
+                        digitosVistos++
+                        if (digitosVistos == clamped) {
+                            return i + 1
+                        }
+                    }
                 }
-                return transformedOffset
+                return formateado.length
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                if (offset <= 0) return 0
-                if (offset > formatted.length) return raw.length
-
-                var rawOffset = 0
-                for (i in 0 until offset.coerceAtMost(formatted.length)) {
-                    if (formatted[i].isLetterOrDigit()) rawOffset++
-                }
-                return rawOffset
+                val clamped = offset.coerceIn(0, formateado.length)
+                return formateado.take(clamped).count { it.isDigit() }
             }
         }
-
-        return TransformedText(AnnotatedString(formatted), offsetMapping)
+        return TransformedText(AnnotatedString(formateado), offsetMapping)
     }
 }
 
-class ClpVisualTransformation : VisualTransformation {
+private class RutVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val raw = text.text.filter { it.isDigit() }
-        if (raw.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
-
-        val numero = raw.toLongOrNull() ?: return TransformedText(text, OffsetMapping.Identity)
-        val simbolos = DecimalFormatSymbols(Locale("es", "CL")).apply {
-            groupingSeparator = '.'
+        val limpio = text.text.filter { it.isDigit() || it == 'k' || it == 'K' }
+        if (limpio.length <= 1) {
+            return TransformedText(AnnotatedString(limpio), OffsetMapping.Identity)
         }
-        val formatted = DecimalFormat("#,###", simbolos).format(numero)
+        val cuerpo = limpio.dropLast(1)
+        val dv = limpio.last()
+        val cuerpoFormateado = cuerpo.reversed()
+            .chunked(3)
+            .joinToString(".")
+            .reversed()
+        val formateado = "$cuerpoFormateado-$dv"
 
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                if (offset <= 0) return 0
-                if (offset > raw.length) return formatted.length
-
-                var transformedOffset = 0
-                var digitCount = 0
-                for (char in formatted) {
-                    if (digitCount == offset) break
-                    if (char.isDigit()) digitCount++
-                    transformedOffset++
+                val clamped = offset.coerceIn(0, limpio.length)
+                if (clamped == 0) return 0
+                var charsVistos = 0
+                for (i in formateado.indices) {
+                    if (formateado[i] != '.' && formateado[i] != '-') {
+                        charsVistos++
+                        if (charsVistos == clamped) {
+                            return i + 1
+                        }
+                    }
                 }
-                return transformedOffset
+                return formateado.length
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                if (offset <= 0) return 0
-                if (offset > formatted.length) return raw.length
-
-                var rawOffset = 0
-                for (i in 0 until offset.coerceAtMost(formatted.length)) {
-                    if (formatted[i].isDigit()) rawOffset++
-                }
-                return rawOffset
+                val clamped = offset.coerceIn(0, formateado.length)
+                return formateado.take(clamped).count { it != '.' && it != '-' }
             }
         }
-
-        return TransformedText(AnnotatedString(formatted), offsetMapping)
+        return TransformedText(AnnotatedString(formateado), offsetMapping)
     }
 }

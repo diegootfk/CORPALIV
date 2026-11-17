@@ -3,9 +3,9 @@ package com.example.corpaliv.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,12 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalConfiguration
 import com.example.corpaliv.R
 
 private val VerdeCorpaliv = Color(0xFF176B50)
@@ -49,28 +49,28 @@ fun HomeScreen(
 
     val colores = MaterialTheme.colorScheme
     val esOscuro = colores.background == Color(0xFF121212)
-    val esAltoContraste = colores.background == Color.White &&
-            colores.onBackground == Color.Black
+    val esAltoContraste = colores.background == Color.Black
 
     val fondo = when {
+        esAltoContraste -> Color.Black
         esOscuro -> Color(0xFF121212)
-        esAltoContraste -> Color.White
         else -> FondoInicio
     }
     val verde = when {
+        esAltoContraste -> Color(0xFFFFFF00)
         esOscuro -> Color(0xFF278A68)
-        esAltoContraste -> Color(0xFF003D2B)
         else -> VerdeCorpaliv
     }
+    val textoSobreVerde = if (esAltoContraste) Color.Black else Color.White
     val verdeSuave = when {
+        esAltoContraste -> Color(0xFF1A1A1A)
         esOscuro -> Color(0xFF263A33)
-        esAltoContraste -> Color(0xFFE8F3EE)
         else -> VerdeSuave
     }
     val textoPrincipal = colores.onSurface
     val textoSecundario = when {
+        esAltoContraste -> Color.White
         esOscuro -> Color(0xFFD0D0D0)
-        esAltoContraste -> Color.Black
         else -> Color(0xFF59645E)
     }
     val colorTarjeta = colores.surface
@@ -98,7 +98,9 @@ fun HomeScreen(
             Image(
                 painter = painterResource(id = R.drawable.logo_corpaliv),
                 contentDescription = "Logo oficial de CORPALIV",
-                modifier = Modifier.fillMaxWidth().height(altoLogo),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(altoLogo),
                 contentScale = ContentScale.Fit
             )
 
@@ -112,7 +114,10 @@ fun HomeScreen(
             Image(
                 painter = painterResource(id = R.drawable.corpaliv_inclusion_real),
                 contentDescription = "Estudiante de la Escuela Especial Jan Van Dijk participando en una actividad junto a una profesional",
-                modifier = Modifier.fillMaxWidth().height(altoImagen).clip(RoundedCornerShape(22.dp)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(altoImagen)
+                    .clip(RoundedCornerShape(22.dp)),
                 contentScale = ContentScale.Crop
             )
 
@@ -123,7 +128,9 @@ fun HomeScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(if (horizontal) 16.dp else 22.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(if (horizontal) 16.dp else 22.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -131,7 +138,7 @@ fun HomeScreen(
                         text = "Bienvenido a CORPALIV",
                         fontSize = if (horizontal) 20.sp else 23.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = textoSobreVerde,
                         textAlign = TextAlign.Center
                     )
                     Text(
@@ -139,7 +146,7 @@ fun HomeScreen(
                                 "la inclusión y el desarrollo de personas con " +
                                 "discapacidad múltiple.",
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = textoSobreVerde,
                         lineHeight = 21.sp,
                         textAlign = TextAlign.Center
                     )
@@ -175,7 +182,8 @@ fun HomeScreen(
                 colorTarjeta = colorTarjeta,
                 colorTexto = textoPrincipal,
                 colorTextoSecundario = textoSecundario,
-                colorVerde = verde
+                colorVerde = verde,
+                colorTextoSobreVerde = textoSobreVerde
             )
 
             TarjetaInicio(
@@ -188,7 +196,8 @@ fun HomeScreen(
                 colorTarjeta = colorTarjeta,
                 colorTexto = textoPrincipal,
                 colorTextoSecundario = textoSecundario,
-                colorVerde = verde
+                colorVerde = verde,
+                colorTextoSobreVerde = textoSobreVerde
             )
 
             Card(
@@ -197,7 +206,9 @@ fun HomeScreen(
                 colors = CardDefaults.cardColors(containerColor = verdeSuave)
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(18.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(18.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -220,11 +231,13 @@ fun HomeScreen(
 
             Button(
                 onClick = onCompartirClick,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = verde,
-                    contentColor = Color.White
+                    contentColor = textoSobreVerde
                 )
             ) {
                 Text(
@@ -233,10 +246,8 @@ fun HomeScreen(
                     fontWeight = FontWeight.SemiBold
                 )
             }
-
         }
 
-        // Imagen panorámica al final de Inicio, a todo el ancho disponible.
         Image(
             painter = painterResource(id = R.drawable.abajo),
             contentDescription = "Transformamos vidas: mensaje de inclusión de CORPALIV",
@@ -261,7 +272,8 @@ private fun TarjetaInicio(
     colorTarjeta: Color,
     colorTexto: Color,
     colorTextoSecundario: Color,
-    colorVerde: Color
+    colorVerde: Color,
+    colorTextoSobreVerde: Color
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -270,7 +282,9 @@ private fun TarjetaInicio(
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(if (horizontal) 14.dp else 18.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(if (horizontal) 14.dp else 18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
@@ -287,11 +301,13 @@ private fun TarjetaInicio(
             )
             Button(
                 onClick = onClick,
-                modifier = Modifier.fillMaxWidth().height(46.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(46.dp),
                 shape = RoundedCornerShape(13.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorVerde,
-                    contentColor = Color.White
+                    contentColor = colorTextoSobreVerde
                 )
             ) {
                 Text(text = textoBoton, fontWeight = FontWeight.SemiBold)

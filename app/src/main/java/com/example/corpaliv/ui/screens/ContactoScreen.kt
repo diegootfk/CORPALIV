@@ -15,7 +15,6 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -101,29 +101,29 @@ fun ContactoScreen(
 
     val colores = MaterialTheme.colorScheme
     val esOscuro = colores.background == Color(0xFF121212)
-    val esAltoContraste = colores.background == Color.White &&
-            colores.onBackground == Color.Black
+    val esAltoContraste = colores.background == Color.Black
 
     val fondo = when {
+        esAltoContraste -> Color.Black
         esOscuro -> Color(0xFF121212)
-        esAltoContraste -> Color.White
         else -> FondoContacto
     }
     val verde = when {
+        esAltoContraste -> Color(0xFFFFFF00)
         esOscuro -> Color(0xFF278A68)
-        esAltoContraste -> Color(0xFF003D2B)
         else -> VerdeContacto
     }
+    val textoSobreVerde = if (esAltoContraste) Color.Black else Color.White
     val verdeSuave = when {
+        esAltoContraste -> Color(0xFF1A1A1A)
         esOscuro -> Color(0xFF263A33)
-        esAltoContraste -> Color(0xFFE8F3EE)
         else -> VerdeSuaveContacto
     }
     val colorTarjeta = colores.surface
     val textoPrincipal = colores.onSurface
     val textoSecundario = when {
+        esAltoContraste -> Color.White
         esOscuro -> Color(0xFFD0D0D0)
-        esAltoContraste -> Color.Black
         else -> Color.DarkGray
     }
 
@@ -146,19 +146,19 @@ fun ContactoScreen(
             ) {
                 Text(
                     text = "CORPALIV",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = textoSobreVerde.copy(alpha = 0.9f),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Conversemos",
-                    color = Color.White,
+                    color = textoSobreVerde,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Las grandes oportunidades nacen de la colaboración. Cuéntanos tu idea y exploremos nuevas formas de promover la inclusión.",
-                    color = Color.White,
+                    color = textoSobreVerde,
                     fontSize = 15.sp,
                     lineHeight = 23.sp
                 )
@@ -283,7 +283,11 @@ fun ContactoScreen(
                     ) {
                         RadioButton(
                             selected = modelo.motivo == opcion,
-                            onClick = { modelo.actualizarMotivo(opcion) }
+                            onClick = { modelo.actualizarMotivo(opcion) },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = verde,
+                                unselectedColor = textoSecundario
+                            )
                         )
                         Text(
                             text = opcion,
@@ -336,7 +340,7 @@ fun ContactoScreen(
                         onClick = { lanzadorCamara.launch(null) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                        colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = verde
                         )
                     ) {
@@ -347,7 +351,7 @@ fun ContactoScreen(
                         onClick = { lanzadorGaleria.launch("image/*") },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                        colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = verde
                         )
                     ) {
@@ -359,13 +363,15 @@ fun ContactoScreen(
                     Image(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = "Vista previa de la fotografía",
-                        modifier = Modifier.fillMaxWidth().height(220.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(220.dp)
                     )
                     OutlinedButton(
                         onClick = { fotoCapturada = null },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                        colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = verde
                         )
                     ) {
@@ -390,11 +396,13 @@ fun ContactoScreen(
                         }
                     },
                     enabled = !modelo.guardando,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = verde,
-                        contentColor = Color.White
+                        contentColor = textoSobreVerde
                     )
                 ) {
                     Text(

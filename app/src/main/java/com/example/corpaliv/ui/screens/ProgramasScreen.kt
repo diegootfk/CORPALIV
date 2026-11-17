@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,18 +55,30 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
     var busqueda by remember { mutableStateOf("") }
 
     val colores = MaterialTheme.colorScheme
+    val esOscuro = colores.background == Color(0xFF121212)
+    val esAltoContraste = colores.background == Color.Black
+
     val fondo = when {
-        colores.background == Color.White && colores.onBackground == Color.Black -> Color.White
-        colores.background == Color(0xFF121212) -> Color(0xFF121212)
+        esAltoContraste -> Color.Black
+        esOscuro -> Color(0xFF121212)
         else -> FondoProgramas
     }
-    val colorTextoSecundario = colores.onSurfaceVariant
-    val verde = if (colores.background == Color(0xFF121212)) Color(0xFF278A68)
-    else if (colores.background == Color.White && colores.onBackground == Color.Black) Color(0xFF003D2B)
-    else VerdeCorpaliv
-    val fondoSuave = if (colores.background == Color(0xFF121212)) Color(0xFF263A33)
-    else if (colores.background == Color.White && colores.onBackground == Color.Black) Color(0xFFE8F3EE)
-    else VerdeSuave
+    val verde = when {
+        esAltoContraste -> Color(0xFFFFFF00)
+        esOscuro -> Color(0xFF278A68)
+        else -> VerdeCorpaliv
+    }
+    val textoSobreVerde = if (esAltoContraste) Color.Black else Color.White
+    val fondoSuave = when {
+        esAltoContraste -> Color(0xFF1A1A1A)
+        esOscuro -> Color(0xFF263A33)
+        else -> VerdeSuave
+    }
+    val colorTextoSecundario = when {
+        esAltoContraste -> Color.White
+        esOscuro -> Color(0xFFD0D0D0)
+        else -> colores.onSurfaceVariant
+    }
 
     Column(
         modifier = modifier
@@ -86,20 +99,20 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
             ) {
                 Text(
                     text = "CORPALIV",
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = textoSobreVerde.copy(alpha = 0.9f),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Nuestros programas",
-                    color = Color.White,
+                    color = textoSobreVerde,
                     fontSize = 27.sp,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 33.sp
                 )
                 Text(
                     text = "Acompañamos el desarrollo de personas con discapacidad múltiple, promoviendo oportunidades de aprendizaje, participación e inclusión.",
-                    color = Color.White,
+                    color = textoSobreVerde,
                     fontSize = 15.sp,
                     lineHeight = 23.sp
                 )
@@ -132,14 +145,16 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
             leadingIcon = { Text("🔎") },
             trailingIcon = {
                 if (busqueda.isNotBlank()) {
-                    androidx.compose.material3.TextButton(onClick = { busqueda = "" }) {
-                        Text("Limpiar")
+                    TextButton(onClick = { busqueda = "" }) {
+                        Text("Limpiar", color = verde)
                     }
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = verde,
+                unfocusedBorderColor = if (esAltoContraste) Color.White else colores.outline,
                 focusedLabelColor = verde,
+                unfocusedLabelColor = colorTextoSecundario,
                 cursorColor = verde
             )
         )
@@ -196,11 +211,16 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
                     Image(
                         painter = painterResource(id = R.drawable.escuela_jan_van_dijk),
                         contentDescription = "Comunidad de la Escuela Especial Jan Van Dijk",
-                        modifier = Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(16.dp)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(190.dp)
+                            .clip(RoundedCornerShape(16.dp)),
                         contentScale = ContentScale.Crop
                     )
                     Box(
-                        modifier = Modifier.background(fondoSuave, RoundedCornerShape(14.dp)).padding(13.dp)
+                        modifier = Modifier
+                            .background(fondoSuave, RoundedCornerShape(14.dp))
+                            .padding(13.dp)
                     ) {
                         Text(text = "📚", fontSize = 28.sp)
                     }
@@ -237,7 +257,7 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = verde,
-                            contentColor = Color.White
+                            contentColor = textoSobreVerde
                         )
                     ) {
                         Text(if (mostrarEscuela) "Ver menos" else "Conocer más")
@@ -260,11 +280,16 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
                     Image(
                         painter = painterResource(id = R.drawable.albalab_cumple_un_ano),
                         contentDescription = "Integrantes de la Red de Inclusión Sociolaboral Alba Lab",
-                        modifier = Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(16.dp)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(190.dp)
+                            .clip(RoundedCornerShape(16.dp)),
                         contentScale = ContentScale.Crop
                     )
                     Box(
-                        modifier = Modifier.background(fondoSuave, RoundedCornerShape(14.dp)).padding(13.dp)
+                        modifier = Modifier
+                            .background(fondoSuave, RoundedCornerShape(14.dp))
+                            .padding(13.dp)
                     ) {
                         Text(text = "🤝", fontSize = 28.sp)
                     }
@@ -301,7 +326,7 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = verde,
-                            contentColor = Color.White
+                            contentColor = textoSobreVerde
                         )
                     ) {
                         Text(if (mostrarAlbaLab) "Ver menos" else "Conocer más")
@@ -326,7 +351,9 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
             colors = CardDefaults.cardColors(containerColor = fondoSuave)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -334,13 +361,13 @@ fun ProgramasScreen(modifier: Modifier = Modifier) {
                     text = "Cada persona merece oportunidades",
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = verde,
+                    color = if (esOscuro) Color(0xFFB7F0D8) else verde,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = "Conocer, participar y colaborar son pasos importantes hacia una sociedad más inclusiva.",
                     fontSize = 15.sp,
-                    color = verde,
+                    color = if (esOscuro) Color(0xFFE0F2E9) else verde,
                     textAlign = TextAlign.Center,
                     lineHeight = 22.sp
                 )
@@ -375,12 +402,16 @@ private fun TarjetaValor(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Box(
-                modifier = Modifier.background(colorIcono, RoundedCornerShape(12.dp)).padding(12.dp),
+                modifier = Modifier
+                    .background(colorIcono, RoundedCornerShape(12.dp))
+                    .padding(12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = simbolo, fontSize = 24.sp)
